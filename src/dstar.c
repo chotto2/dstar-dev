@@ -17,7 +17,7 @@
 
 #define D_MAX (128)
 #define N_MIN (0)
-#define N_MAX (1000000ULL)
+#define N_MAX (1024ULL)
 #define M_MAX (N_MAX)
 
 typedef struct {
