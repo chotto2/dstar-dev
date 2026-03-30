@@ -56,9 +56,9 @@ docker run -it dstar-dev /app/build/dstar
 ## Performance
 
 ```text
-real    0m0.657s
-user    0m0.021s
-sys     0m0.019s
+real    2m43.174s
+user    0m0.087s
+sys     0m0.435s
 ```
 
 ※Codespace: 2-Core  
