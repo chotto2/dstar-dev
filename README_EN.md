@@ -7,23 +7,34 @@ A comprehensive list that visualizes the patterns and tendencies of integer divi
 
 ## Overview
 
-This program examines and displays divisors of integers from 0 to 1024 using the Sieve of Eratosthenes, representing them with asterisks.
+This program examines and displays divisors of integers from 0 to 1000000 using the Sieve of Eratosthenes, representing them with asterisks.
 This is the origin program that led to the publicly released Prime Oasis.
 The inspiration for creating the Prime Oasis command suite came from the patterns plotted by this program (hereafter referred to as dstar).
 In object-oriented terms, it can be considered a superclass or parent class.
 Therefore, without understanding the divisor patterns output by dstar, it would be difficult to comprehend the Prime Oasis README.
 This serves as the fundamental foundation.
-The resulting list is available in results/resultds.txt - please take a look!
+Due to its large file size, the result list is not included in the repository.  
+Please download `resultds.txt` from **[Releases](https://github.com/chotto2/dstar-dev/releases)** and take a look.  
 
 ## Features
 
 - 🐳 **Docker Support** - Reproducible build environment
-- 📊 **Divisors up to 1024** - Suitable size for educational and research purposes
+- 📊 **Divisors up to 1000000** - Suitable size for educational and research purposes
 
 ## Requirements
 
 - Docker Desktop
 - Git
+
+## Result File
+
+Due to its large file size, the result file (`resultds.txt`) is not included in the repository.  
+Please download it from the **[Releases](https://github.com/chotto2/dstar-dev/releases)** page on GitHub.
+
+```bash
+# Using gh CLI
+gh release download --pattern "resultds.txt"
+```
 
 ## Build and Run
 
@@ -58,8 +69,8 @@ sys     0m0.019s
 Sample output from `dstar-dev`:
 
 ```text
-      n:   d(n):divisors2(n, 1024)
-      0:   1024:******************************** ...
+      n:   d(n):divisors2(n, 128)
+      0:1000000:******************************** ...
       1:      1:*
       2:      2:**
       3:      2:* *
@@ -81,9 +92,9 @@ Sample output from `dstar-dev`:
 The first line indicates that each list row consists of three fields separated by ':'.  
 The first field, n, represents the target integer value.  
 The second field, d(n), indicates the number of divisors of integer n.  
-The third field, divisor2(n, 1024), shows asterisks plotted at divisor positions.  
+The third field, divisor2(n, 128), shows asterisks plotted at divisor positions.  
 The positions of divisors (asterisks) are in ascending order 1, 2, 3... from closest to the second field.  
-divisor2(n, 1024) finds divisors limited to an upper bound of 1024 and displays the results with asterisks.  
+divisor2(n, 128) finds divisors limited to an upper bound of 128 and displays the results with asterisks.  
 
 For example, looking at the output for integer 6:
 
@@ -101,8 +112,8 @@ This shows that integer 6 has 4 divisors: {1,2,3,6}. (Positions 4 and 5 are blan
 - VOID regions have no divisors (such as n<divisor or n/2<divisor<n)
 
 ```text
-      n:   d(n):divisors2(n, 1024)
-      0:   1024:******************************** ...
+      n:   d(n):divisors2(n, 128)
+      0:1000000:******************************** ...
       1:      1:*
       2:      2:**
       3:      2:* *
@@ -149,12 +160,12 @@ This shows that integer 6 has 4 divisors: {1,2,3,6}. (Positions 4 and 5 are blan
   Related divisors are changed from asterisks to numbers.  
   The divisors of n=6 are {1,2,3,6}.  
   When unfolded at 45-degree angles forward and backward, it appears as shown below.  
-  I don't know if there's a mathematical theorem for this, but it's a discovery from observation.  
+  Whether or not a formal theorem exists, this pattern was discovered through observation.  
   Let's call it the "45-degree mirror image conjecture of divisors."
 
 ```text
-      n:   d(n):divisors2(n, 1024)
-      0:   1024:*****6************************** ...
+      n:   d(n):divisors2(n, 128)
+      0:1000000:*****6************************** ...
       1:      1:*
       2:      2:**
       3:      2:* 3
@@ -178,11 +189,11 @@ This shows that integer 6 has 4 divisors: {1,2,3,6}. (Positions 4 and 5 are blan
 - **Language**: C
 - **Library**: GMP (GNU Multiple Precision Arithmetic Library)
 - **Build System**: CMake
-- **Divisor Range**: 0..1024
+- **Divisor Range**: 0..1000000
 
 ## Important Notes
 
-⚠️ **Important**: This version is an implementation for educational and research purposes. Since it handles divisors up to integer 1024, it does not affect modern cryptographic systems (such as RSA-4096).
+⚠️ **Important**: This version is an implementation for educational and research purposes. Since it handles divisors up to integer 1000000, it does not affect modern cryptographic systems (such as RSA-4096).
 
 ## Future Plans
 
