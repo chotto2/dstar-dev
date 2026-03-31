@@ -43,7 +43,7 @@ DIVS divs[N_MAX+1] = {0};
 /**
  * @brief Main entry point
  */
-int main()
+int main(int argc, char *argv[])
 {
 	uint64_t m;
 	uint64_t n;
@@ -52,6 +52,14 @@ int main()
 	uint64_t ofs;
 	uint32_t count;
 	uint64_t pre;
+	int benchmark_mode = 0;  // デフォルトは通常モード
+
+	// 引数解析
+	for (int i = 1; i < argc; i++) {
+    	if (strcmp(argv[i], "--benchmark") == 0) {
+        	benchmark_mode = 1;
+ 	   }
+	}
 
 	for (m = 1; m <= M_MAX; m++) {
 		// for top position.
@@ -75,26 +83,28 @@ int main()
 	}
 
 	// for printing.
-	printf("      n:   d(n):divisors2(n, %u)\n", DSP_MAX);
-	printf("%7u:%7d:", 0, N_MAX);
-	for (m = 1; m <= DSP_MAX; m++) {
-		printf("*");
-	}
-	printf("...\n");
-	for (n = N_MIN; n <= N_MAX; n++) {
-		printf("%7lu:%7d:", n, divs[n-N_MIN].cnt);
-		pre = 0;
-		for (ofs = 0; ofs < D_MAX; ofs++) {
-			m = divs[n-N_MIN].div[ofs];
-			if (m == 0) break;
-			if (m > DSP_MAX) continue;
-			if (pre) {
-				for (int i = 0; i < (m - pre - 1); i++) printf(" ");
-			}
+	if (!benchmark_mode) {
+		printf("      n:   d(n):divisors2(n, %u)\n", DSP_MAX);
+		printf("%7u:%7d:", 0, N_MAX);
+		for (m = 1; m <= DSP_MAX; m++) {
 			printf("*");
-			pre = m;
 		}
-		printf("\n");
+		printf("...\n");
+		for (n = N_MIN; n <= N_MAX; n++) {
+			printf("%7lu:%7d:", n, divs[n-N_MIN].cnt);
+			pre = 0;
+			for (ofs = 0; ofs < D_MAX; ofs++) {
+				m = divs[n-N_MIN].div[ofs];
+				if (m == 0) break;
+				if (m > DSP_MAX) continue;
+				if (pre) {
+					for (int i = 0; i < (m - pre - 1); i++) printf(" ");
+				}
+				printf("*");
+				pre = m;
+			}
+			printf("\n");
+		}
 	}
 	return ret;
 }
