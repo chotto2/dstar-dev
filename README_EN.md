@@ -65,7 +65,7 @@ sys     0m0.5379s
 ```
 
 ※Codespace: 2-Core  
-※No output when the '--benchmark' argument is specified
+※No output when the '--benchmark' argument is specified  
 ※Average of 10 measurements
 
 
