@@ -29,7 +29,6 @@
 #include <stdint.h>
 
 #define D_MAX (256)
-#define N_MIN (1)
 #define N_MAX (1000000)
 #define M_MAX (N_MAX)
 #define DSP_MAX (128)
@@ -64,23 +63,12 @@ int main(int argc, char *argv[])
 
 	/*--- other ---*/
 	for (m = 1; m <= M_MAX; m++) {
-		// for top position.
-		if ((N_MIN % m) == 0) {
-			n = N_MIN;
-		}
-		else {
-			n = N_MIN / m;
-			n = n * m;
-			n += m;
-		}
-
-		// for stars.
-		for ( ; n <= N_MAX; n += m) {
+		for (n = m; n <= N_MAX; n += m) {
 			if (m < D_MAX) {
-				count = divs[n-N_MIN].cnt;
-				divs[n-N_MIN].div[count] = m;
+				count = divs[n].cnt;
+				divs[n].div[count] = m;
 			}
-			divs[n-N_MIN].cnt++;
+			divs[n].cnt++;
 		}
 	}
 
@@ -92,11 +80,11 @@ int main(int argc, char *argv[])
 			printf("*");
 		}
 		printf("...\n");
-		for (n = N_MIN; n <= N_MAX; n++) {
-			printf("%7lu:%7d:", n, divs[n-N_MIN].cnt);
+		for (n = 1; n <= N_MAX; n++) {
+			printf("%7lu:%7d:", n, divs[n].cnt);
 			pre = 0;
 			for (ofs = 0; ofs < D_MAX; ofs++) {
-				m = divs[n-N_MIN].div[ofs];
+				m = divs[n].div[ofs];
 				if (m == 0) break;
 				if (m > DSP_MAX) continue;
 				if (pre) {
