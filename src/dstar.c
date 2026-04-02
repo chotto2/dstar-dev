@@ -40,6 +40,8 @@ typedef struct {
 } DIVS, *pDIVS;
 DIVS divs[N_MAX+1] = {0};
 
+int benchmark_mode = 0;
+
 /**
  * @brief Main entry point
  */
@@ -52,15 +54,15 @@ int main(int argc, char *argv[])
 	uint64_t ofs;
 	uint32_t count;
 	uint64_t pre;
-	int benchmark_mode = 0;  // デフォルトは通常モード
 
-	// 引数解析
+	/*--- check argv ---*/
 	for (int i = 1; i < argc; i++) {
     	if (strcmp(argv[i], "--benchmark") == 0) {
         	benchmark_mode = 1;
  	   }
 	}
 
+	/*--- other ---*/
 	for (m = 1; m <= M_MAX; m++) {
 		// for top position.
 		if ((N_MIN % m) == 0) {

@@ -51,18 +51,22 @@ docker build -t dstar-dev .
 
 # Run (list output)
 docker run -it dstar-dev /app/build/dstar
+
+# Run（No list output + performance measurement）
+docker run --rm  bash -c "time /app/build/dstar --benchmark"
 ```
 
 ## Performance
 
 ```text
-real    2m43.174s
-user    0m0.087s
-sys     0m0.435s
+real    0m0.849s
+user    0m0.225s
+sys     0m0.549s
 ```
 
 ※Codespace: 2-Core  
-※Without output redirection
+※No output when the '--benchmark' argument is specified
+
 
 ## Output Example
 

@@ -49,20 +49,23 @@ cd dstar-dev
 # Dockerイメージのビルド
 docker build -t dstar-dev .
 
-# 実行（リスト出力）
+# 実行（リスト出力あり）
 docker run -it dstar-dev /app/build/dstar
+
+# 実行（リスト出力なし＋パフォーマンス測定）
+docker run --rm dstar-dev bash -c "time /app/build/dstar --benchmark"
 ```
 
 ## パフォーマンス
 
 ```text
-real    2m43.174s
-user    0m0.087s
-sys     0m0.435s
+real    0m0.849s
+user    0m0.225s
+sys     0m0.549s
 ```
 
 ※Codespace:2-Core  
-※出力のリダイレクトなし
+※引数'--benchmark'指定で出力なし
 
 ## 出力例
 
