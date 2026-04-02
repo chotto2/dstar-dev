@@ -59,13 +59,14 @@ docker run --rm dstar-dev bash -c "time /app/build/dstar --benchmark"
 ## パフォーマンス
 
 ```text
-real    0m0.849s
-user    0m0.225s
-sys     0m0.549s
+real    0m0.8958s
+user    0m0.3064s
+sys     0m0.5379s
 ```
 
 ※Codespace:2-Core  
 ※引数'--benchmark'指定で出力なし
+※測定10回の平均値
 
 ## 出力例
 
