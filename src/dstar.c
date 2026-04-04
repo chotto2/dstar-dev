@@ -7,6 +7,12 @@
  * This program plots the divisors of integers from 0 to n using asterisks. 
  * This allows you to understand the overall distribution pattern of divisors among integers.
  *
+ * @note v1.1.0 (2026-04-04): Up to 2,000,000
+ *       1. Extended the upper limit of integers from 1,000,000 to 2,000,000
+ *       2. Expanded the memory that holds divisors
+ *          - Note: d(1441440)=288 is the maximum within the range 0–2,000,000, so the array size is set to 296. (approx. 2.4GB)
+ *          - Note: Change to dynamic memory(calloc)
+ *       
  * @note v1.1.0 (2026-03-29): Up to 1,000,000
  *       1. Extended the upper limit of integers from 1024 to 1,000,000
  *       2. Removed original bit operations
@@ -27,9 +33,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 
-#define D_MAX (256)
-#define N_MAX (1000000)
+#define D_MAX (296)
+#define N_MAX (2000000)
 #define M_MAX (N_MAX)
 #define DSP_MAX (128)
 
@@ -37,7 +44,7 @@ typedef struct {
 	uint32_t div[D_MAX];
 	int cnt;
 } DIVS, *pDIVS;
-DIVS divs[N_MAX+1] = {0};
+pDIVS divs;
 
 int benchmark_mode = 0;
 
@@ -51,8 +58,8 @@ int main(int argc, char *argv[])
 	uint64_t d;
 	int ret = 0;
 	uint64_t ofs;
-	uint32_t count;
 	uint64_t pre;
+	pDIVS divs;
 
 	/*--- check argv ---*/
 	for (int i = 1; i < argc; i++) {
@@ -61,18 +68,22 @@ int main(int argc, char *argv[])
  	   }
 	}
 
-	/*--- other ---*/
+	/*--- divs[N_MAX+1] ---*/
+	divs = calloc(N_MAX+1, sizeof(DIVS));
+	if (divs == NULL) {
+		printf("ERR: NULL = calloc(%d, %d)\n", N_MAX+1, sizeof(DIVS));
+		return -1;
+	}
+
+	/*--- Sieve of Eratosthenes ---*/
 	for (m = 1; m <= M_MAX; m++) {
 		for (n = m; n <= N_MAX; n += m) {
-			if (m < D_MAX) {
-				count = divs[n].cnt;
-				divs[n].div[count] = m;
-			}
+			divs[n].div[divs[n].cnt] = m;
 			divs[n].cnt++;
 		}
 	}
 
-	// for printing.
+	/*--- for printing ---*/
 	if (!benchmark_mode) {
 		printf("      n:   d(n):divisors2(n, %u)\n", DSP_MAX);
 		printf("%7u:%7d:", 0, N_MAX);
@@ -96,5 +107,8 @@ int main(int argc, char *argv[])
 			printf("\n");
 		}
 	}
+
+	free(divs);
+
 	return ret;
 }
