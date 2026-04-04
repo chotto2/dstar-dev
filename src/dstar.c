@@ -59,7 +59,6 @@ int main(int argc, char *argv[])
 	int ret = 0;
 	uint64_t ofs;
 	uint64_t pre;
-	pDIVS divs;
 
 	/*--- check argv ---*/
 	for (int i = 1; i < argc; i++) {

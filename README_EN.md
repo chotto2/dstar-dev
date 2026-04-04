@@ -69,7 +69,6 @@ sys     0m1.205s
 ※Average of 10 measurements
 ※Dynamically change the divisor storage area (calloc)
 
-
 ## Output Example
 
 Sample output from `dstar-dev`:
