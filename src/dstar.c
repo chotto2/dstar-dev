@@ -7,7 +7,7 @@
  * This program plots the divisors of integers from 0 to n using asterisks. 
  * This allows you to understand the overall distribution pattern of divisors among integers.
  *
- * @note v1.1.0 (2026-04-04): Up to 2,000,000
+ * @note v1.2.0 (2026-04-04): Up to 2,000,000
  *       1. Extended the upper limit of integers from 1,000,000 to 2,000,000
  *       2. Expanded the memory that holds divisors
  *          - Note: d(1441440)=288 is the maximum within the range 0–2,000,000, so the array size is set to 296. (approx. 2.4GB)
