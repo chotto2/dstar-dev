@@ -7,6 +7,11 @@
  * This program plots the divisors of integers from 0 to n using asterisks. 
  * This allows you to understand the overall distribution pattern of divisors among integers.
  *
+ * @note v1.3.0 (2026-04-05): Up to 3,000,000
+ *       1. Extended the upper limit of integers from 2,000,000 to 3,000,000
+ *       2. Expanded the memory that holds divisors
+ *          - Note: d(2948400)=299 is the maximum within the range 0–3,000,000, so the array size is set to 300. (approx. 3.6GB)
+ *       
  * @note v1.2.0 (2026-04-04): Up to 2,000,000
  *       1. Extended the upper limit of integers from 1,000,000 to 2,000,000
  *       2. Expanded the memory that holds divisors
@@ -35,8 +40,8 @@
 #include <stdint.h>
 #include <string.h>
 
-#define D_MAX (296)
-#define N_MAX (2000000)
+#define D_MAX (300)
+#define N_MAX (3000000)
 #define M_MAX (N_MAX)
 #define DSP_MAX (128)
 
