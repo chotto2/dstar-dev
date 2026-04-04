@@ -7,7 +7,7 @@ A comprehensive list that visualizes the patterns and tendencies of integer divi
 
 ## Overview
 
-This program examines and displays divisors of integers from 0 to 1000000 using the Sieve of Eratosthenes, representing them with asterisks.
+This program examines and displays divisors of integers from 0 to 2000000 using the Sieve of Eratosthenes, representing them with asterisks.
 This is the origin program that led to the publicly released Prime Oasis.
 The inspiration for creating the Prime Oasis command suite came from the patterns plotted by this program (hereafter referred to as dstar).
 In object-oriented terms, it can be considered a superclass or parent class.
@@ -19,7 +19,7 @@ Please download `resultds.txt` from **[Releases](https://github.com/chotto2/dsta
 ## Features
 
 - 🐳 **Docker Support** - Reproducible build environment
-- 📊 **Divisors up to 1000000** - Suitable size for educational and research purposes
+- 📊 **Divisors up to 2000000** - Suitable size for educational and research purposes
 
 ## Requirements
 
@@ -53,20 +53,21 @@ docker build -t dstar-dev .
 docker run -it dstar-dev /app/build/dstar
 
 # Run（No list output + performance measurement）
-docker run --rm  bash -c "time /app/build/dstar --benchmark"
+docker run --rm dstar-dev bash -c "time /app/build/dstar --benchmark"
 ```
 
 ## Performance
 
 ```text
-real    0m0.8958s
-user    0m0.3064s
-sys     0m0.5379s
+real    0m2.3472s
+user    0m0.9914s
+sys     0m1.205s
 ```
 
 ※Codespace: 2-Core  
 ※No output when the '--benchmark' argument is specified  
 ※Average of 10 measurements
+※Dynamically change the divisor storage area (calloc)
 
 
 ## Output Example
@@ -75,7 +76,7 @@ Sample output from `dstar-dev`:
 
 ```text
       n:   d(n):divisors2(n, 128)
-      0:1000000:******************************** ...
+      0:2000000:******************************** ...
       1:      1:*
       2:      2:**
       3:      2:* *
@@ -118,7 +119,7 @@ This shows that integer 6 has 4 divisors: {1,2,3,6}. (Positions 4 and 5 are blan
 
 ```text
       n:   d(n):divisors2(n, 128)
-      0:1000000:******************************** ...
+      0:2000000:******************************** ...
       1:      1:*
       2:      2:**
       3:      2:* *
@@ -170,7 +171,7 @@ This shows that integer 6 has 4 divisors: {1,2,3,6}. (Positions 4 and 5 are blan
 
 ```text
       n:   d(n):divisors2(n, 128)
-      0:1000000:*****6************************** ...
+      0:2000000:*****6************************** ...
       1:      1:*
       2:      2:**
       3:      2:* 3
@@ -194,11 +195,11 @@ This shows that integer 6 has 4 divisors: {1,2,3,6}. (Positions 4 and 5 are blan
 - **Language**: C
 - **Library**: GMP (GNU Multiple Precision Arithmetic Library)
 - **Build System**: CMake
-- **Divisor Range**: 0..1000000
+- **Divisor Range**: 0..2000000
 
 ## Important Notes
 
-⚠️ **Important**: This version is an implementation for educational and research purposes. Since it handles divisors up to integer 1000000, it does not affect modern cryptographic systems (such as RSA-4096).
+⚠️ **Important**: This version is an implementation for educational and research purposes. Since it handles divisors up to integer 2000000, it does not affect modern cryptographic systems (such as RSA-4096).
 
 ## Future Plans
 
