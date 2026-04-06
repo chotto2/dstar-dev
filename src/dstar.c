@@ -40,7 +40,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#define D_MAX (304)
+#define D_MAX (344)
 #define N_MAX (3000000)
 #define M_MAX (N_MAX)
 #define DSP_MAX (128)
