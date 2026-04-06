@@ -60,12 +60,10 @@ int main(int argc, char *argv[])
 {
 	uint64_t m;
 	uint64_t n;
-	uint64_t max_n;
 	uint64_t d;
 	int ret = 0;
 	uint64_t ofs;
 	uint64_t pre;
-	int max_cnt = 0;
 
 	/*--- check argv ---*/
 	for (int i = 1; i < argc; i++) {
@@ -88,13 +86,8 @@ int main(int argc, char *argv[])
 				divs[n].div[divs[n].cnt] = m;
 			}
 			divs[n].cnt++;
-			if (max_cnt < divs[n].cnt) {
-				max_cnt = divs[n].cnt;
-				max_n   = n;
-			}
 		}
 	}
-	printf("max_cnt(%lu) = %d\n", max_n, max_cnt);
 
 	/*--- for printing ---*/
 	if (!benchmark_mode) {
