@@ -52,13 +52,16 @@
 #include <stdint.h>
 #include <string.h>
 
-#define D_MAX (360)
 #define N_MAX (4000000)
+//#define N_MAX (1000000)
 #define M_MAX (N_MAX)
 #define DSP_MAX (128)
 
+uint32_t *divs_pool;
+
 typedef struct {
-	uint32_t div[D_MAX];
+	uint32_t pool_ofs;
+	uint32_t pool_cnt;
 	int cnt;
 } DIVS, *pDIVS;
 pDIVS divs;
@@ -84,18 +87,44 @@ int main(int argc, char *argv[])
  	   }
 	}
 
-	/*--- divs[N_MAX+1] ---*/
+	/*--- alloc divs ---*/
 	divs = calloc(N_MAX+1, sizeof(DIVS));
 	if (divs == NULL) {
-		printf("ERR: NULL = calloc(%d, %d)\n", N_MAX+1, sizeof(DIVS));
+		printf("ERR: divs(0) = calloc(%d, %ld)\n", N_MAX+1, sizeof(DIVS));
 		return -1;
 	}
+//	printf("sizeof(DIVS) = %ld\n", sizeof(DIVS));
+//	printf("sizeof(DIVS)*(N_MAX+1) = %ld\n", sizeof(DIVS)*(N_MAX+1));
+
+	/*--- make pool_cnt ---*/
+	for (m = 1; m <= M_MAX; m++) {
+		for (n = m; n <= N_MAX; n += m) {
+			divs[n].pool_cnt++;
+		}
+	}
+
+	/*--- make pool_ofs ---*/
+	ofs = 0;
+	for (n = 1; n <= N_MAX; n++) {
+		divs[n].pool_ofs = ofs;
+		ofs += divs[n].pool_cnt;
+		ofs++;	// for NULL padding.
+	}
+
+	/*--- alloc pool ---*/
+	divs_pool = calloc(ofs, sizeof(uint32_t));
+	if (divs_pool == NULL) {
+		printf("ERR: divs_pool(0) = calloc(%d, %ld)\n", ofs, sizeof(uint32_t));
+		return -2;
+	}
+//	printf("ofs = %ld\n", ofs);
+//	printf("ofs*sizeof(uint32_t) = %ld\n", ofs*sizeof(uint32_t));
 
 	/*--- Sieve of Eratosthenes ---*/
 	for (m = 1; m <= M_MAX; m++) {
 		for (n = m; n <= N_MAX; n += m) {
-			if (divs[n].cnt < D_MAX) {
-				divs[n].div[divs[n].cnt] = m;
+			if (divs[n].cnt < divs[n].pool_cnt) {
+				divs_pool[divs[n].pool_ofs+divs[n].cnt] = m;
 			}
 			divs[n].cnt++;
 		}
@@ -112,8 +141,8 @@ int main(int argc, char *argv[])
 		for (n = 1; n <= N_MAX; n++) {
 			printf("%7lu:%7d:", n, divs[n].cnt);
 			pre = 0;
-			for (ofs = 0; ofs < D_MAX; ofs++) {
-				m = divs[n].div[ofs];
+			for (ofs = 0; ofs < divs[n].pool_cnt; ofs++) {
+				m = divs_pool[divs[n].pool_ofs+ofs];
 				if (m == 0) break;
 				if (m > DSP_MAX) continue;
 				if (pre) {
@@ -126,6 +155,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	free(divs_pool);
 	free(divs);
 
 	return ret;
