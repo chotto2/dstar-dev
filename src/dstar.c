@@ -53,11 +53,17 @@
 #include <string.h>
 #include <sys/resource.h>
 #include <sys/time.h>
+#include <ctype.h>
 
-#define N_MAX (4000000)
+//#define N_MAX (4000000)
 //#define N_MAX (1000000)
+#define N_MAX n_max
 #define M_MAX (N_MAX)
 #define DSP_MAX (128)
+
+#define ERR_ARGSTYPE	(-1)
+#define ERR_DIVSALOC	(-2)
+#define ERR_POOLALOC	(-3)
 
 uint32_t *divs_pool;
 
@@ -68,7 +74,16 @@ typedef struct {
 } DIVS, *pDIVS;
 pDIVS divs;
 
+uint64_t n_max = 1000000;
 int benchmark_mode = 0;
+
+int is_digits(const char *s) {
+    if (s == NULL || *s == '\0') return 0;
+    for (; *s; s++) {
+        if (!isdigit((unsigned char)*s)) return 0;
+    }
+    return 1;
+}
 
 /**
  * @brief Main entry point
@@ -86,16 +101,27 @@ int main(int argc, char *argv[])
 
 	/*--- check argv ---*/
 	for (int i = 1; i < argc; i++) {
-    	if (strcmp(argv[i], "--benchmark") == 0) {
-        	benchmark_mode = 1;
- 	   }
+		if (strcmp(argv[i], "--benchmark") == 0) {
+			benchmark_mode = 1;
+		}
+		else {
+			if (i == 1) {
+				if (is_digits(argv[i])) {
+					n_max = atoll(argv[i]);
+				}
+				else {
+					printf("USAGE: dstar [<n_max>] [--benchmark]\n");
+					return ERR_ARGSTYPE;
+				}
+			}
+		}
 	}
 
 	/*--- alloc divs ---*/
 	divs = calloc(N_MAX+1, sizeof(DIVS));
 	if (divs == NULL) {
-		printf("ERR: divs(0) = calloc(%d, %ld)\n", N_MAX+1, sizeof(DIVS));
-		return -1;
+		printf("ERR: divs(0) = calloc(%ld, %ld)\n", N_MAX+1, sizeof(DIVS));
+		return ERR_DIVSALOC;
 	}
 //	printf("sizeof(DIVS) = %ld\n", sizeof(DIVS));
 //	printf("sizeof(DIVS)*(N_MAX+1) = %ld\n", sizeof(DIVS)*(N_MAX+1));
@@ -118,8 +144,10 @@ int main(int argc, char *argv[])
 	/*--- alloc pool ---*/
 	divs_pool = calloc(ofs, sizeof(uint32_t));
 	if (divs_pool == NULL) {
-		printf("ERR: divs_pool(0) = calloc(%d, %ld)\n", ofs, sizeof(uint32_t));
-		return -2;
+		free(divs);
+		divs = NULL;
+		printf("ERR: divs_pool(0) = calloc(%ld, %ld)\n", ofs, sizeof(uint32_t));
+		return ERR_POOLALOC;
 	}
 //	printf("ofs = %ld\n", ofs);
 //	printf("ofs*sizeof(uint32_t) = %ld\n", ofs*sizeof(uint32_t));
@@ -160,7 +188,7 @@ int main(int argc, char *argv[])
 	else {
 		/*--- print divisor stars ---*/
 		printf("      n:   d(n):divisors2(n, %u)\n", DSP_MAX);
-		printf("%7u:%7d:", 0, N_MAX);
+		printf("%7u:%7ld:", 0, N_MAX);
 		for (m = 1; m <= DSP_MAX; m++) {
 			printf("*");
 		}
