@@ -55,8 +55,6 @@
 #include <sys/time.h>
 #include <ctype.h>
 
-//#define N_MAX (4000000)
-//#define N_MAX (1000000)
 #define N_MAX n_max
 #define M_MAX (N_MAX)
 #define DSP_MAX (128)
@@ -70,11 +68,11 @@ uint32_t *divs_pool;
 typedef struct {
 	uint32_t pool_ofs;
 	uint32_t pool_cnt;
-	int cnt;
+	uint32_t cnt;
 } DIVS, *pDIVS;
 pDIVS divs;
 
-uint64_t n_max = 1000000;
+uint32_t n_max = 1000000;
 int benchmark_mode = 0;
 
 int is_digits(const char *s) {
@@ -90,12 +88,12 @@ int is_digits(const char *s) {
  */
 int main(int argc, char *argv[])
 {
-	uint64_t m;
-	uint64_t n;
-	uint64_t d;
+	uint32_t m;
+	uint32_t n;
+	uint32_t d;
 	int ret = 0;
-	uint64_t ofs;
-	uint64_t pre;
+	uint32_t ofs;
+	uint32_t pre;
 	struct rusage r_start, r_end;
 	struct timeval wall_start, wall_end;
 
@@ -120,7 +118,7 @@ int main(int argc, char *argv[])
 	/*--- alloc divs ---*/
 	divs = calloc(N_MAX+1, sizeof(DIVS));
 	if (divs == NULL) {
-		printf("ERR: divs(0) = calloc(%ld, %ld)\n", N_MAX+1, sizeof(DIVS));
+		printf("ERR: divs(0) = calloc(%u, %ld)\n", N_MAX+1, sizeof(DIVS));
 		return ERR_DIVSALOC;
 	}
 //	printf("sizeof(DIVS) = %ld\n", sizeof(DIVS));
@@ -146,10 +144,10 @@ int main(int argc, char *argv[])
 	if (divs_pool == NULL) {
 		free(divs);
 		divs = NULL;
-		printf("ERR: divs_pool(0) = calloc(%ld, %ld)\n", ofs, sizeof(uint32_t));
+		printf("ERR: divs_pool(0) = calloc(%u, %ld)\n", ofs, sizeof(uint32_t));
 		return ERR_POOLALOC;
 	}
-//	printf("ofs = %ld\n", ofs);
+//	printf("ofs = %u\n", ofs);
 //	printf("ofs*sizeof(uint32_t) = %ld\n", ofs*sizeof(uint32_t));
 
 	/*--- get start time ---*/
