@@ -2,12 +2,12 @@
  * @file dstar.c
  * @brief Plot of divisors using the Sieve of Eratosthenes.
  * @author N.Arai
- * @date 2026-04-13
+ * @date 2026-04-15
  *
  * This program plots the divisors of integers from 0 to n using asterisks. 
  * This allows you to understand the overall distribution pattern of divisors among integers.
  *
- * @note v1.4.0 (2026-04-13): Up to 10,000,000
+ * @note v2.0.0 (2026-04-15): Up to 10,000,000
  *       1. Improvement of memory usage efficiency.(approx. 0.8GB)
  *       2. Built-in benchmark measurement.
  *       3. Setting the upper limit of an integer by the first argument.
@@ -54,61 +54,8 @@
 #include <sys/resource.h>
 #include <sys/time.h>
 #include <ctype.h>
-
-#define N_MAX n_max
-#define M_MAX (N_MAX)
-#define DSP_MAX (128)
-
-#define ERR_OK		(0)
-#define ERR_ARGSTYPE	(-1)
-#define ERR_DIVSALOC	(-2)
-#define ERR_POOLALOC	(-3)
-
-#define get_start_time() {			\
-	gettimeofday(&wall_start, NULL);	\
-	getrusage(RUSAGE_SELF, &r_start);	\
-}
-
-#define get_end_time() {			\
-	gettimeofday(&wall_end, NULL);		\
-	getrusage(RUSAGE_SELF, &r_end);		\
-}
-
-#define print_benchmark() {								\
-	double wall = (wall_end.tv_sec - wall_start.tv_sec)				\
-		    + (wall_end.tv_usec - wall_start.tv_usec) / 1e6;			\
-	double user = (r_end.ru_utime.tv_sec  - r_start.ru_utime.tv_sec)		\
-		    + (r_end.ru_utime.tv_usec - r_start.ru_utime.tv_usec) / 1e6;	\
-	double sys  = (r_end.ru_stime.tv_sec  - r_start.ru_stime.tv_sec)		\
-		    + (r_end.ru_stime.tv_usec - r_start.ru_stime.tv_usec) / 1e6;	\
-	printf("real %.3fs user %.3fs  sys %.3fs\n", wall, user, sys);			\
-}
-
-typedef struct {
-	uint32_t pool_ofs;
-	uint32_t pool_cnt;
-	uint32_t cnt;
-} DIVS;
-
-
-static uint32_t n_max = 1000000;
-static int benchmark_mode = 0;
-static struct rusage r_start, r_end;
-static struct timeval wall_start, wall_end;
-
-static int check_arg(int argc, char *argv[]);
-static DIVS *calloc_divs(void);
-static uint32_t set_pool_info(DIVS *divs);
-static uint32_t *calloc_pool(uint32_t pool_num);
-static void print_divisor_stars(DIVS *divs, uint32_t *divs_pool);
-
-static int is_digits(const char *s) {
-    if (s == NULL || *s == '\0') return 0;
-    for (; *s; s++) {
-        if (!isdigit((unsigned char)*s)) return 0;
-    }
-    return 1;
-}
+#include "benchmark.h"
+#include "divs.h"
 
 /**
  * @brief Main entry point
@@ -139,24 +86,29 @@ int main(int argc, char *argv[])
 				ret = ERR_POOLALOC;
 			}
 			else {
-				get_start_time();
-
-				/*--- Sieve of Eratosthenes ---*/
-				for (m = 1; m <= M_MAX; m++) {
-					for (n = m; n <= N_MAX; n += m) {
-						divs_pool[divs[n].pool_ofs+divs[n].cnt] = m;
-						divs[n].cnt++;
-					}
-				}
-
-				get_end_time();
-
-				/*--- print results ---*/
-				if (benchmark_mode) {
-					print_benchmark();
+				if (memory_mode) {
+					printf("total memory = %lu\n", total_memory);
 				}
 				else {
-					print_divisor_stars(divs, divs_pool);
+					get_start_time();
+
+					/*--- Sieve of Eratosthenes ---*/
+					for (m = 1; m <= M_MAX; m++) {
+						for (n = m; n <= N_MAX; n += m) {
+							divs_pool[divs[n].pool_ofs+divs[n].cnt] = m;
+							divs[n].cnt++;
+						}
+					}
+
+					get_end_time();
+
+					/*--- print results ---*/
+					if (benchmark_mode) {
+						print_benchmark();
+					}
+					else {
+						print_divisor_stars(divs, divs_pool);
+					}
 				}
 
 				free(divs_pool);
@@ -170,23 +122,53 @@ int main(int argc, char *argv[])
 	return ret;
 }
 
+static void print_usage()
+{
+	printf("USAGE: dstar <n_max> [{-m | --memory}] [{-b | --benchmark}]\n");
+	printf("\n");
+	printf("  n_max            Upper limit for divisor computation (positive integer)\n");
+	printf("  -m, --memory     Show memory required for n_max and exit (no computation)\n");
+	printf("                   (takes precedence over -b if both are specified)\n");
+	printf("  -b, --benchmark  Show elapsed/user/sys time after computation\n");
+}
+
 static int check_arg(int argc, char *argv[])
 {
 	int ret = ERR_OK;
 
-	for (int i = 1; i < argc; i++) {
-		if (strcmp(argv[i], "--benchmark") == 0) {
-			benchmark_mode = 1;
-		}
-		else {
+	if (argc < 2) {
+		print_usage();
+		ret = ERR_ARGC;
+	}
+	else {
+		for (int i = 1; i < argc; i++) {
 			if (i == 1) {
 				if (is_digits(argv[i])) {
 					n_max = atoll(argv[i]);
 				}
 				else {
-					printf("USAGE: dstar [<n_max>] [--benchmark]\n");
-					return ERR_ARGSTYPE;
+					print_usage();
+					ret = ERR_ARGSTYPE;
+					break;
 				}
+			}
+			else {
+				if ((strcmp(argv[i], "--memory") == 0)
+				||  (strcmp(argv[i], "-m") == 0)) {
+					memory_mode = 1;
+				}
+				else {
+					if ((strcmp(argv[i], "--benchmark") == 0)
+					||  (strcmp(argv[i], "-b") == 0)) {
+						benchmark_mode = 1;
+					}
+					else {
+						print_usage();
+						ret = ERR_ILLGPARM;
+						break;
+					}
+				}
+
 			}
 		}
 	}
@@ -202,8 +184,7 @@ static DIVS *calloc_divs()
 	if (p == NULL) {
 		printf("ERR: divs(0) = calloc(%u, %ld)\n", N_MAX+1, sizeof(DIVS));
 	}
-//	printf("sizeof(DIVS) = %ld\n", sizeof(DIVS));
-//	printf("sizeof(DIVS)*(N_MAX+1) = %ld\n", sizeof(DIVS)*(N_MAX+1));
+	total_memory = sizeof(DIVS)*(N_MAX+1);
 
 	return p;
 }
@@ -241,8 +222,7 @@ static uint32_t *calloc_pool(uint32_t num)
 	if (p == NULL) {
 		printf("ERR: divs_pool(0) = calloc(%u, %ld)\n", num, sizeof(uint32_t));
 	}
-//	printf("num = %u\n", num);
-//	printf("num*sizeof(uint32_t) = %ld\n", num*sizeof(uint32_t));
+	total_memory += sizeof(uint32_t)*num;
 
 	return p;
 }
@@ -253,15 +233,16 @@ static void print_divisor_stars(DIVS *divs, uint32_t *divs_pool)
 	uint32_t n;
 	uint32_t pre;
 	uint32_t ofs;
-	
+	int width = snprintf(NULL, 0, "%lu", N_MAX);
+
 	printf("      n:   d(n):divisors2(n, %u)\n", DSP_MAX);
-	printf("%7u:%7u:", 0, N_MAX);
+	printf("%*u:%*u:", width, 0, width, N_MAX);
 	for (m = 1; m <= DSP_MAX; m++) {
 		printf("*");
 	}
 	printf("...\n");
 	for (n = 1; n <= N_MAX; n++) {
-		printf("%7u:%7u:", n, divs[n].cnt);
+		printf("%*u:%*u:", width, n, width, divs[n].cnt);
 		pre = 0;
 		for (ofs = 0; ofs < divs[n].pool_cnt; ofs++) {
 			m = divs_pool[divs[n].pool_ofs+ofs];
