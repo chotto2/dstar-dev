@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM ubuntu:latest
+FROM gcc:latest
 
 # 日本ミラー変更 + BuildKit キャッシュマウント
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
