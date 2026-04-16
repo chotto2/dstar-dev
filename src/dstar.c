@@ -54,11 +54,39 @@
 #include <sys/resource.h>
 #include <sys/time.h>
 #include <ctype.h>
+#include <errno.h>
 #include "benchmark.h"
 #include "divs.h"
 
+uint32_t n_max;
+static int memory_mode = 0;
+static int benchmark_mode = 0;
+static uint64_t total_memory;
+
+static int check_arg(int argc, char *argv[]);
+static DIVS *calloc_divs(void);
+static uint32_t set_pool_info(DIVS *divs);
+static uint32_t *calloc_pool(uint32_t pool_num);
+static void print_divisor_stars(DIVS *divs, uint32_t *divs_pool);
+
+static int is_digits(const char *s) {
+    if (s == NULL || *s == '\0') return 0;
+    for (; *s; s++) {
+        if (!isdigit((unsigned char)*s)) return 0;
+    }
+    return 1;
+}
+
 /**
  * @brief Main entry point
+ *
+ * @return 0 on success, negative error code on failure:
+ *        -1: A non-numeric value was specified as the first argument
+ *        -2: No arguments were specified
+ *        -3: An illegal argument was specified
+ *        -4: Exceeded the upper limit of n_max
+ *        -5: Failed to allocate divisor structures
+ *        -6: Failed to allocate divisor pool
  */
 int main(int argc, char *argv[])
 {
@@ -122,6 +150,9 @@ int main(int argc, char *argv[])
 	return ret;
 }
 
+/**
+ * @brief Display the usage of the command
+ */
 static void print_usage()
 {
 	printf("USAGE: dstar <n_max> [{-m | --memory}] [{-b | --benchmark}]\n");
@@ -132,6 +163,16 @@ static void print_usage()
 	printf("  -b, --benchmark  Show elapsed/user/sys time after computation\n");
 }
 
+/**
+ * @brief Check the command arguments
+ *
+ * @return 0 on success, negative error code on failure:
+ *        -1: A non-numeric value was specified as the first argument
+ *        -2: No arguments were specified
+ *        -3: A illegal argument was specified
+ *        -4: Exceeded the upper limit of n_max
+ *
+ */
 static int check_arg(int argc, char *argv[])
 {
 	int ret = ERR_OK;
@@ -144,7 +185,17 @@ static int check_arg(int argc, char *argv[])
 		for (int i = 1; i < argc; i++) {
 			if (i == 1) {
 				if (is_digits(argv[i])) {
-					n_max = atoll(argv[i]);
+					errno = 0;
+					unsigned long val = strtoul(argv[1], NULL, 10);
+					if (errno == ERANGE || val == 0 || val > N_MAX_LIMIT) {
+    						printf("ERR: n_max out of range\n");
+						print_usage();
+    						ret = ERR_RANGOVER;
+						break;
+					}
+					else {
+						n_max = (uint32_t)val;
+					}
 				}
 				else {
 					print_usage();
@@ -168,7 +219,6 @@ static int check_arg(int argc, char *argv[])
 						break;
 					}
 				}
-
 			}
 		}
 	}
@@ -176,6 +226,12 @@ static int check_arg(int argc, char *argv[])
 	return ret;
 }
 
+/**
+ * @brief Allocate several structures that indirectly point to the list of divisors
+ *
+ * @return Address of the allocated structures, NULL on error
+ *
+ */
 static DIVS *calloc_divs()
 {
 	DIVS *p;
@@ -189,7 +245,14 @@ static DIVS *calloc_divs()
 	return p;
 }
 
-
+/**
+ * @brief Set the position and number in the pool
+ *
+ * @param[in]  divs Refers to a part of the pool for each integer
+ *
+ * @return  Total number of words in the pool to allocate
+ *
+ */
 static uint32_t set_pool_info(DIVS *divs)
 {
 	uint32_t m;
@@ -214,6 +277,15 @@ static uint32_t set_pool_info(DIVS *divs)
 	return ofs;
 }
 
+/**
+ * @brief Allocate memory area to hold a list of divisors
+ *
+ * @param[in]  num  Number of words in the list of all divisors
+ *                  - Note: including NULL padding
+ *
+ * @return Address of the allocated pool, NULL on error
+ *
+ */
 static uint32_t *calloc_pool(uint32_t num)
 {
 	uint32_t *p;
@@ -227,13 +299,20 @@ static uint32_t *calloc_pool(uint32_t num)
 	return p;
 }
 
+/**
+ * @brief Display the divisors in the table
+ *
+ * @param[in]  divs       Refers to the list of divisors within the pool
+ * @param[in]  divs_pool  A block of NULL-padded divisor lists
+ *
+ */
 static void print_divisor_stars(DIVS *divs, uint32_t *divs_pool)
 {
 	uint32_t m;
 	uint32_t n;
 	uint32_t pre;
 	uint32_t ofs;
-	int width = snprintf(NULL, 0, "%lu", N_MAX);
+	int width = snprintf(NULL, 0, "%u", N_MAX);
 
 	printf("      n:   d(n):divisors2(n, %u)\n", DSP_MAX);
 	printf("%*u:%*u:", width, 0, width, N_MAX);
