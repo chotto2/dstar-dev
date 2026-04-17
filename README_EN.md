@@ -7,7 +7,7 @@ A comprehensive list that visualizes the patterns and tendencies of integer divi
 
 ## Overview
 
-This program examines and displays divisors of integers from 0 to 3000000 using the Sieve of Eratosthenes, representing them with asterisks.
+This program examines and displays divisors of integers from 0 to 10000000 using the Sieve of Eratosthenes, representing them with asterisks.
 This is the origin program that led to the publicly released Prime Oasis.
 The inspiration for creating the Prime Oasis command suite came from the patterns plotted by this program (hereafter referred to as dstar).
 In object-oriented terms, it can be considered a superclass or parent class.
@@ -19,7 +19,7 @@ Please download `resultds.txt` from **[Releases](https://github.com/chotto2/dsta
 ## Features
 
 - 🐳 **Docker Support** - Reproducible build environment
-- 📊 **Divisors up to 3000000** - Suitable size for educational and research purposes
+- 📊 **Divisors up to 10000000** - Suitable size for educational and research purposes
 
 ## Requirements
 
@@ -51,23 +51,42 @@ cd dstar-dev
 # Build Docker image
 docker build -t dstar-dev .
 
-# Run (list output)
-docker run -it dstar-dev /app/build/dstar
+# Run (Usage output)
+docker run -it dstar-dev dstar
+USAGE: dstar { {-v | --version} | <n_max> [{-m | --memory}] [{-b | --benchmark}] }
 
-# Run（No list output + performance measurement）
-docker run --rm dstar-dev bash -c "time /app/build/dstar --benchmark"
+  -v, --version    Show version number
+  n_max            Upper limit for divisor computation (positive integer)
+  -m, --memory     Show memory required for n_max and exit (no computation)
+                   (takes precedence over -b if both are specified)
+  -b, --benchmark  Show elapsed/user/sys time after computation
+
+# Run (version number output)
+docker run  -it dstar-dev dstar -v
+version: 2.0.0
+
+# Run (list output)
+docker run -it dstar-dev dstar 10000000
+
+# Run (No list output + performance measurement)
+docker run -it dstar-dev dstar 10000000 -b
+real 2.602s user 2.351s  sys 0.194s
+
+# Run (No list output + no performance measurement + display memory usage)
+docker run -it dstar-dev dstar 10000000 -m
+total memory = 810901468
 ```
 
 ## Performance
 
 ```text
-real    0m3.8125s
-user    0m1.6927s
-sys     0m2.0004s
+real    2.654s
+user    2.384s
+sys     0.183s
 ```
 
 ※Codespace: 2-Core  
-※No output when the '--benchmark' argument is specified  
+※List output suppressed with '--benchmark'; timing results are displayed  
 ※Average of 10 measurements
 ※Dynamically allocate the divisor storage area (calloc)
 
@@ -76,37 +95,37 @@ sys     0m2.0004s
 Sample output from `dstar-dev`:
 
 ```text
-      n:   d(n):divisors2(n, 128)
-      0:3000000:******************************** ...
-      1:      1:*
-      2:      2:**
-      3:      2:* *
-      4:      3:** *
-      5:      2:*   *
-      6:      4:***  *
-      7:      2:*     * 
-      8:      4:** *   *
-      9:      3:* *     *
-     10:      4:**  *    *
-     11:      2:*         *
-     12:      6:**** *     *
-     13:      2:*           *
-     14:      4:**    *      *
-     15:      4:* * *         *
+       n:    d(n):divisors2(n, 128)
+       0:10000000:******************************** ...
+       1:       1:*
+       2:       2:**
+       3:       2:* *
+       4:       3:** *
+       5:       2:*   *
+       6:       4:***  *
+       7:       2:*     * 
+       8:       4:** *   *
+       9:       3:* *     *
+      10:       4:**  *    *
+      11:       2:*         *
+      12:       6:**** *     *
+      13:       2:*           *
+      14:       4:**    *      *
+      15:       4:* * *         *
 ...
 ```
 
 The first line indicates that each list row consists of three fields separated by ':'.  
 The first field, n, represents the target integer value.  
 The second field, d(n), indicates the number of divisors of integer n.  
-The third field, divisor2(n, 128), shows asterisks plotted at divisor positions.  
+The third field, divisors2(n, 128), shows asterisks plotted at divisor positions.  
 The positions of divisors (asterisks) are in ascending order 1, 2, 3... from closest to the second field.  
-divisor2(n, 128) finds divisors limited to an upper bound of 128 and displays the results with asterisks.  
+divisors2(n, 128) finds divisors limited to an upper bound of 128 and displays the results with asterisks.  
 
 For example, looking at the output for integer 6:
 
 ```text
-      6:      4:***  * 
+       6:       4:***  * 
 ```
 
 This shows that integer 6 has 4 divisors: {1,2,3,6}. (Positions 4 and 5 are blank)
@@ -119,23 +138,23 @@ This shows that integer 6 has 4 divisors: {1,2,3,6}. (Positions 4 and 5 are blan
 - VOID regions have no divisors (such as n<divisor or n/2<divisor<n)
 
 ```text
-      n:   d(n):divisors2(n, 128)
-      0:3000000:******************************** ...
-      1:      1:*
-      2:      2:**
-      3:      2:* *
-      4:      3:** *
-      5:      2:*   *
-      6:      4:***  *
-      7:      2:*     *          (VOID)
-      8:      4:** *   *
-      9:      3:* *     *
-     10:      4:**  *    *
-     11:      2:*         *
-     12:      6:**** *     *
-     13:      2:*           *
-     14:      4:**    *(VOID)*
-     15:      4:* * *         *
+       n:    d(n):divisors2(n, 128)
+       0:10000000:******************************** ...
+       1:       1:*
+       2:       2:**
+       3:       2:* *
+       4:       3:** *
+       5:       2:*   *
+       6:       4:***  *
+       7:       2:*     *          (VOID)
+       8:       4:** *   *
+       9:       3:* *     *
+      10:       4:**  *    *
+      11:       2:*         *
+      12:       6:**** *     *
+      13:       2:*           *
+      14:       4:**    *(VOID)*
+      15:       4:* * *         *
 ...
 ```
 
@@ -147,19 +166,19 @@ This shows that integer 6 has 4 divisors: {1,2,3,6}. (Positions 4 and 5 are blan
   Indeed, in this example, positions ±1 are prime numbers.  
 
 ```text
-     54:      8:***  6  *        *        *                          *
-     55:      4:*   5     *                                           *
-     56:      8:** 4  **     *             *                           * 
-     57:      4:* 3               *                                     *
-     58:      4:*2                          *                            *
-     59:      2:1                                                         *
-     60:     12:123456   * *  *    *         *                             *
-     61:      2:1                                                           *
-     62:      4:*2                            *                              *
-     63:      6:* 3   * *           *                                         *
-     64:      7:** 4   *       *               *                               *
-     65:      4:*   5       *                                                   *
-     66:      8:***  6    *          *          *                                *
+      54:       8:***  6  *        *        *                          *
+      55:       4:*   5     *                                           *
+      56:       8:** 4  **     *             *                           * 
+      57:       4:* 3               *                                     *
+      58:       4:*2                          *                            *
+      59:       2:1                                                         *
+      60:      12:123456   * *  *    *         *                             *
+      61:       2:1                                                           *
+      62:       4:*2                            *                              *
+      63:       6:* 3   * *           *                                         *
+      64:       7:** 4   *       *               *                               *
+      65:       4:*   5       *                                                   *
+      66:       8:***  6    *          *          *                                *
 ```
 
 - The divisor pattern of integer n unfolds in the same pattern at 45-degree angles forward and backward.
@@ -171,23 +190,23 @@ This shows that integer 6 has 4 divisors: {1,2,3,6}. (Positions 4 and 5 are blan
   Let's call it the "45-degree mirror image conjecture of divisors."
 
 ```text
-      n:   d(n):divisors2(n, 128)
-      0:3000000:*****6************************** ...
-      1:      1:*
-      2:      2:**
-      3:      2:* 3
-      4:      3:*2 *
-      5:      2:1   *
-      6:      4:123  6
-      7:      2:1     *
-      8:      4:*2 *   *
-      9:      3:* 3     *
-     10:      4:**  *    *
-     11:      2:*         *
-     12:      6:**** 6     *
-     13:      2:*           *
-     14:      4:**    *      *
-     15:      4:* * *         *
+       n:    d(n):divisors2(n, 128)
+       0:10000000:*****6************************** ...
+       1:       1:*
+       2:       2:**
+       3:       2:* 3
+       4:       3:*2 *
+       5:       2:1   *
+       6:       4:123  6
+       7:       2:1     *
+       8:       4:*2 *   *
+       9:       3:* 3     *
+      10:       4:**  *    *
+      11:       2:*         *
+      12:       6:**** 6     *
+      13:       2:*           *
+      14:       4:**    *      *
+      15:       4:* * *         *
 ...
 ```
 
@@ -196,11 +215,11 @@ This shows that integer 6 has 4 divisors: {1,2,3,6}. (Positions 4 and 5 are blan
 - **Language**: C
 - **Library**: GMP (GNU Multiple Precision Arithmetic Library)
 - **Build System**: CMake
-- **Divisor Range**: 0..3000000
+- **Divisor Range**: 0..10000000
 
 ## Important Notes
 
-⚠️ **Important**: This version is an implementation for educational and research purposes. Since it handles divisors up to integer 3000000, it does not affect modern cryptographic systems (such as RSA-4096).
+⚠️ **Important**: This version is an implementation for educational and research purposes. Since it handles divisors up to integer 10000000, it does not affect modern cryptographic systems (such as RSA-4096).
 
 ## Future Plans
 

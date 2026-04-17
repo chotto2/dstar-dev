@@ -87,6 +87,7 @@ static int is_digits(const char *s) {
  *        -4: Exceeded the upper limit of n_max
  *        -5: Failed to allocate divisor structures
  *        -6: Failed to allocate divisor pool
+ *        -7: Show version only
  */
 int main(int argc, char *argv[])
 {
@@ -155,8 +156,9 @@ int main(int argc, char *argv[])
  */
 static void print_usage()
 {
-	printf("USAGE: dstar <n_max> [{-m | --memory}] [{-b | --benchmark}]\n");
+	printf("USAGE: dstar { {-v | --version} | <n_max> [{-m | --memory}] [{-b | --benchmark}] }\n");
 	printf("\n");
+	printf("  -v, --version    Show version number\n");
 	printf("  n_max            Upper limit for divisor computation (positive integer)\n");
 	printf("  -m, --memory     Show memory required for n_max and exit (no computation)\n");
 	printf("                   (takes precedence over -b if both are specified)\n");
@@ -184,23 +186,31 @@ static int check_arg(int argc, char *argv[])
 	else {
 		for (int i = 1; i < argc; i++) {
 			if (i == 1) {
-				if (is_digits(argv[i])) {
-					errno = 0;
-					unsigned long val = strtoul(argv[1], NULL, 10);
-					if (errno == ERANGE || val == 0 || val > N_MAX_LIMIT) {
-    						printf("ERR: n_max out of range\n");
-						print_usage();
-    						ret = ERR_RANGOVER;
-						break;
-					}
-					else {
-						n_max = (uint32_t)val;
-					}
+				if ((strcmp(argv[i], "--version") == 0)
+				||  (strcmp(argv[i], "-v") == 0)) {
+					printf("version: %s\n", VERSION);
+					ret = ERR_VERSION;
+					break;
 				}
 				else {
-					print_usage();
-					ret = ERR_ARGSTYPE;
-					break;
+					if (is_digits(argv[i])) {
+						errno = 0;
+						unsigned long val = strtoul(argv[1], NULL, 10);
+						if (errno == ERANGE || val == 0 || val > N_MAX_LIMIT) {
+    							printf("ERR: n_max out of range\n");
+							print_usage();
+    							ret = ERR_RANGOVER;
+							break;
+						}
+						else {
+							n_max = (uint32_t)val;
+						}
+					}
+					else {
+						print_usage();
+						ret = ERR_ARGSTYPE;
+						break;
+					}
 				}
 			}
 			else {
@@ -314,7 +324,8 @@ static void print_divisor_stars(DIVS *divs, uint32_t *divs_pool)
 	uint32_t ofs;
 	int width = snprintf(NULL, 0, "%u", N_MAX);
 
-	printf("      n:   d(n):divisors2(n, %u)\n", DSP_MAX);
+	width = (width < 7)? 7: width;		// for compatibility
+	printf("%*s:%*s:divisors2(n, %u)\n", width, "n", width, "d(n)",  DSP_MAX);
 	printf("%*u:%*u:", width, 0, width, N_MAX);
 	for (m = 1; m <= DSP_MAX; m++) {
 		printf("*");
